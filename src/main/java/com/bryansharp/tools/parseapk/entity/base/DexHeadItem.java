@@ -1,5 +1,7 @@
 package com.bryansharp.tools.parseapk.entity.base;
 
+import com.bryansharp.tools.parseapk.utils.Utils;
+
 /**
  * Created by bushaopeng on 17/3/16.
  */
@@ -22,7 +24,14 @@ public class DexHeadItem extends DexItem {
 
     @Override
     public String toString() {
-        return name + ":" + bytes2Int();
+        int data = bytes2Int();
+        String dataStr;
+        if (data < 0) {
+            dataStr = Utils.bytesToString(this.data, 0);
+        } else {
+            dataStr = data + "";
+        }
+        return name + ":" + dataStr;
     }
 
     public String getContentDesc() {

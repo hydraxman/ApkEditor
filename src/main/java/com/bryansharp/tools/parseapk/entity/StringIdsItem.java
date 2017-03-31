@@ -13,7 +13,7 @@ public class StringIdsItem extends IntRefsItem {
         super(name);
     }
 
-    protected void parseBaseRealData(byte[] dexData) {
+    public void parseBaseRealData(byte[] dexData) {
         String[] realData = new String[refs.length];
         for (int i = 0; i < realData.length; i++) {
             int start = refs[i];

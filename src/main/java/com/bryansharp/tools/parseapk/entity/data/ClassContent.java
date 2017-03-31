@@ -3,7 +3,7 @@ package com.bryansharp.tools.parseapk.entity.data;
 
 import com.bryansharp.tools.parseapk.entity.FieldIdsItem;
 import com.bryansharp.tools.parseapk.entity.MethodIdsItem;
-import com.bryansharp.tools.parseapk.entity.base.DexData;
+import com.bryansharp.tools.parseapk.DexData;
 import com.bryansharp.tools.parseapk.entity.base.DexDataItem;
 import com.bryansharp.tools.parseapk.utils.Mutf8;
 import com.bryansharp.tools.parseapk.utils.Utils;

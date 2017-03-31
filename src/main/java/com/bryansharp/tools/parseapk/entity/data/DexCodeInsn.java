@@ -1,7 +1,7 @@
 package com.bryansharp.tools.parseapk.entity.data;
 
 
-import com.bryansharp.tools.parseapk.entity.base.DexData;
+import com.bryansharp.tools.parseapk.DexData;
 import com.bryansharp.tools.parseapk.entity.base.DexDataItem;
 import com.bryansharp.tools.parseapk.entity.base.DvmOpcode;
 import com.bryansharp.tools.parseapk.utils.Utils;
@@ -58,6 +58,9 @@ public class DexCodeInsn {
                 }
             } else {
                 String digit = hexLine.substring(off, off + repTimes + 1);
+                if (digit.length() >= 8) {
+                    digit = digit.substring(4, 8) + digit.substring(0, 4);
+                }
                 descMap.put(p + "", Utils.hexToInt(digit));
             }
         }

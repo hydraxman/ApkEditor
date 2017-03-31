@@ -1,6 +1,7 @@
 package com.bryansharp.tools.parseapk.entity.base;
 
 
+import com.bryansharp.tools.parseapk.DexData;
 import com.bryansharp.tools.parseapk.utils.LogUtils;
 
 import java.util.Map;
@@ -10,7 +11,7 @@ import java.util.Map;
  */
 public abstract class DexDataItem<T, U> extends DexItem {
 
-    protected T[] refs;
+    public T[] refs;
     public U[] realData;
     public int count;
 
@@ -45,9 +46,11 @@ public abstract class DexDataItem<T, U> extends DexItem {
         LogUtils.log("\n" + name + " : byteSize is " + byteSize + " : count is " + count + " : start is " + start + " : data is :", true);
     }
 
+    protected int refStart = 0;
+
     public void fillRefs() {
         int refSize = getRefSize();
-        for (int i = 0; i < byteSize; i += refSize) {
+        for (int i = refStart; i < byteSize; i += refSize) {
             refs[i / refSize] = parseRef(i);
         }
     }
@@ -58,10 +61,10 @@ public abstract class DexDataItem<T, U> extends DexItem {
         this.data = data;
     }
 
-    protected void parseBaseRealData(byte[] dexData) {
+    public void parseBaseRealData(byte[] dexData) {
     }
 
-    protected void parse1stRealData(Map<String, DexDataItem> dataItems, byte[] dexData) {
+    public void parse1stRealData(Map<String, DexDataItem> dataItems, byte[] dexData) {
     }
 
     protected abstract T parseRef(int i);
@@ -75,5 +78,11 @@ public abstract class DexDataItem<T, U> extends DexItem {
     }
 
     public void parse4thRealData(Map<String, DexDataItem> dataItems, byte[] dexData) {
+    }
+
+    public void fillSize(int count) {
+        this.count = count;
+        this.byteSize = count * getRefSize();
+        this.refs = createRefs();
     }
 }

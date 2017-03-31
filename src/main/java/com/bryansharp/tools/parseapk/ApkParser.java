@@ -1,6 +1,6 @@
 package com.bryansharp.tools.parseapk;
 
-import com.bryansharp.tools.parseapk.entity.base.DexData;
+import com.bryansharp.tools.parseapk.utils.Log2File;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -44,6 +44,7 @@ public class ApkParser {
         dexObj.fillHeaders(dexData);
         dexObj.fillData();
         dexObj.printData();
+        Log2File.closeAll();
 
     }
 }

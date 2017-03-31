@@ -9,6 +9,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.zip.Adler32;
 
 /**
  * Copyright  2016
@@ -84,8 +85,8 @@ public final class Log2File {
      * @param logFileName log 文件名
      */
     private static void saveLog2File(String msg, String logFileName) {
-        FileWriter objFilerWriter = null;
-        BufferedWriter objBufferedWriter = null;
+        FileWriter filerWriter = null;
+        BufferedWriter bufferedWriter = null;
         do { // 非循环，只是为了减少分支缩进深度
             // 未安装 SD 卡
             File rootPath = new File(sLogFolderPath);
@@ -108,20 +109,20 @@ public final class Log2File {
                 }
 
                 try {
-                    objFilerWriter = new FileWriter(fileLogFilePath, true);          // 续写不覆盖
+                    filerWriter = new FileWriter(fileLogFilePath, true);          // 续写不覆盖
                 } catch (IOException e1) {
                     LogUtils.log("New FileWriter Instance failed");
                     e1.printStackTrace();
                     break;
                 }
 
-                objBufferedWriter = new BufferedWriter(objFilerWriter);
+                bufferedWriter = new BufferedWriter(filerWriter);
 
                 try {
-                    objBufferedWriter.write(msg + "\n");
-                    objBufferedWriter.flush();
+                    bufferedWriter.write(msg + "\n");
+                    bufferedWriter.flush();
                 } catch (IOException e) {
-                    LogUtils.log("objBufferedWriter.write or objBufferedWriter.flush failed");
+                    LogUtils.log("bufferedWriter.write or bufferedWriter.flush failed");
                     e.printStackTrace();
                 }
             } else {
@@ -129,21 +130,24 @@ public final class Log2File {
             }
         } while (false);
 
-        if (null != objBufferedWriter) {
+        if (null != bufferedWriter) {
             try {
-                objBufferedWriter.close();
+                bufferedWriter.close();
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }
 
-        if (null != objFilerWriter) {
+        if (null != filerWriter) {
             try {
-                objFilerWriter.close();
+                filerWriter.close();
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }
     }
 
+    public static void closeAll() {
+        mSingleExecutors.shutdown();
+    }
 }

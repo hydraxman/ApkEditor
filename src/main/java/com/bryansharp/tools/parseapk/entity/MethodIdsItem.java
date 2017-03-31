@@ -1,7 +1,7 @@
 package com.bryansharp.tools.parseapk.entity;
 
 
-import com.bryansharp.tools.parseapk.entity.base.DexData;
+import com.bryansharp.tools.parseapk.DexData;
 import com.bryansharp.tools.parseapk.utils.Utils;
 import com.bryansharp.tools.parseapk.entity.base.DexDataItem;
 import com.bryansharp.tools.parseapk.entity.data.MethodContent;
