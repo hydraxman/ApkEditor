@@ -27,15 +27,14 @@ import java.util.zip.Adler32;
  * limitations under the License.
  */
 public final class Log2File {
+    public static final String TAG = "FILE_LOG";
     // 存放日志文件的目录全路径
     public static String sLogFolderPath = new File(".").getAbsolutePath();
-
     //日志打印日期
-    private static SimpleDateFormat fileDateFormat = new SimpleDateFormat("MM-dd-mmss");
+    private static SimpleDateFormat fileDateFormat = new SimpleDateFormat("MM-dd HH:mm:ss");
+    public static final String LOG_FILENAME = fileDateFormat.format(new Date()) + ".txt";
     //单线程 用写文件 防止 anr
     private static ExecutorService mSingleExecutors = Executors.newSingleThreadExecutor();
-    public static final String TAG = "FILE_LOG";
-    public static final String LOG_FILENAME = fileDateFormat.format(new Date()) + ".txt";
 
     /**
      * 4.指定Log文件名,仅输出Log 到文件

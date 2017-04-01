@@ -21,13 +21,13 @@ public class DexCodeInsn {
 
     @Override
     public String toString() {
-        return "\n\t\t\tDexCodeInsn{" +
-                "op=" + op +
-                ", data=" + Utils.bytesToInsnForm(data) +
-                ", desc='" + desc + '\'' +
-                ", descMap='" + descMap + '\'' +
-                ", opTarget='" + opTarget + '\'' +
-                '}';
+        String opTargetStr = "unknown";
+        if (opTarget instanceof String) {
+            opTargetStr = (String) opTarget;
+        } else if (opTarget instanceof MethodContent) {
+            opTargetStr = "method:" + ((MethodContent) opTarget).className + "." + ((MethodContent) opTarget).name;
+        }
+        return "\n\n\t\t\t\t " + op.form + " " + op.pattern + " " + op.dataPos1 + " \n\t\t\t\t[" + Utils.bytesToInsnForm(data) + "] " + op.name + " " + opTargetStr + " " + descMap;
     }
 
     public void parseInsn(Map<String, DexDataItem> dataItems) {
@@ -57,17 +57,27 @@ public class DexCodeInsn {
                     repTimes++;
                 }
             } else {
-                String digit = hexLine.substring(off, off + repTimes + 1);
+                int appearTimes = repTimes + 1;
+                String digit = hexLine.substring(off, off + appearTimes);
                 if (digit.length() >= 8) {
                     digit = digit.substring(4, 8) + digit.substring(0, 4);
+                }
+                if (appearTimes >= 4) {
+                    if (op.dataPos1 != 'N') {
+                        op.dataPos1 = p;
+                    } else if (op.dataPos2 != 'N') {
+                        op.dataPos2 = p;
+                    } else if (op.dataPos3 != 'N') {
+                        op.dataPos3 = p;
+                    }
                 }
                 descMap.put(p + "", Utils.hexToInt(digit));
             }
         }
-        if (op.desc.contains("invok")) {
+        if (op.name.contains("invok")) {
             Integer b = descMap.get("B");
             opTarget = dataItems.get(DexData.METHOD_IDS).realData[b];
-        } else if ("const-string".equals(op.desc)) {
+        } else if ("const-string".equals(op.name)) {
             Integer b = descMap.get("B");
             opTarget = dataItems.get(DexData.STRING_IDS).realData[b];
         }
