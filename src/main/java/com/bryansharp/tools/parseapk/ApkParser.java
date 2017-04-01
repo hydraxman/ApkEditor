@@ -1,5 +1,6 @@
 package com.bryansharp.tools.parseapk;
 
+import com.android.dex.Dex;
 import com.bryansharp.tools.parseapk.utils.Log2File;
 
 import java.io.ByteArrayOutputStream;
@@ -40,6 +41,7 @@ public class ApkParser {
             outputStream.write(bytes, 0, len);
         }
         byte[] dexData = outputStream.toByteArray();
+        Dex dex = new Dex(dexData);
         DexData dexObj = new DexData();
         dexObj.fillHeaders(dexData);
         dexObj.fillData();
