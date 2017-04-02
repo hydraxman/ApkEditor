@@ -74,6 +74,7 @@ public class DexCode {
             int i = 0;
             while (size > 0) {
                 ints = Mutf8.readUnsignedLeb128(dexData, off);
+                //this is a uleb128p1
                 int result = ints[0] - 1;
                 if (result == -1) {
                     debugInfo.parameterNames[i] = "NO_INDEX";
