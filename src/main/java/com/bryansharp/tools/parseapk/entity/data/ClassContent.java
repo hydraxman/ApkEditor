@@ -9,7 +9,10 @@ import com.bryansharp.tools.parseapk.utils.Mutf8;
 import com.bryansharp.tools.parseapk.utils.Utils;
 
 import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * Created by bsp on 17/3/18.
@@ -19,6 +22,7 @@ public class ClassContent {
     public String superClassName;
     public String sourceFile;
     public ClassData classData;
+    public List<Object> staticValues=new LinkedList<>();
 
     @Override
     public String toString() {
@@ -27,6 +31,7 @@ public class ClassContent {
                 ", superClassName='" + superClassName + '\'' +
                 ", sourceFile='" + sourceFile + '\'' +
                 ", classData=" + classData +
+                ", staticValues=" + staticValues +
                 '}';
     }
 
@@ -112,6 +117,7 @@ public class ClassContent {
                         codeOff += 2;
                     }
                     code.parseInsns(dataItems);
+                    code.parseDebugInfo(dexData,dataItems.get(DexData.STRING_IDS));
                 }
             }
             return offset;

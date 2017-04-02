@@ -1,6 +1,8 @@
 package com.bryansharp.tools.parseapk.utils;
 
 
+import com.android.dex.DexException;
+import com.android.dex.util.ByteInput;
 import com.bryansharp.tools.parseapk.entity.base.DvmOpcode;
 
 import java.util.HashMap;
@@ -16,43 +18,43 @@ public class Utils {
 
     public static Map<String, DexOpcodeType> getPatternFormMap() {
         if (patternFormMap.size() == 0) {
-            patternFormMap.put("00x",new DexOpcodeType("00x", "N/A"));
-            patternFormMap.put("10x",new DexOpcodeType("10x", "ØØ|op"));
-            patternFormMap.put("12x",new DexOpcodeType("12x", "B|A|op"));
-            patternFormMap.put("11n",new DexOpcodeType("11n", "B|A|op"));
-            patternFormMap.put("11x",new DexOpcodeType("11x", "AA|op"));
-            patternFormMap.put("10t",new DexOpcodeType("10t", "AA|op"));
-            patternFormMap.put("20t",new DexOpcodeType("20t", "ØØ|op AAAA"));
-            patternFormMap.put("20bc",new DexOpcodeType("20bc", "AA|op BBBB"));
-            patternFormMap.put("22x",new DexOpcodeType("22x", "AA|op BBBB"));
-            patternFormMap.put("21t",new DexOpcodeType("21t", "AA|op BBBB"));
-            patternFormMap.put("21s",new DexOpcodeType("21s", "AA|op BBBB"));
-            patternFormMap.put("21h",new DexOpcodeType("21h", "AA|op BBBB"));
-            patternFormMap.put("21c",new DexOpcodeType("21c", "AA|op BBBB"));
-            patternFormMap.put("23x",new DexOpcodeType("23x", "AA|op CC|BB"));
-            patternFormMap.put("22b",new DexOpcodeType("22b", "AA|op CC|BB"));
-            patternFormMap.put("22t",new DexOpcodeType("22t", "B|A|op CCCC"));
-            patternFormMap.put("22s",new DexOpcodeType("22s", "B|A|op CCCC"));
-            patternFormMap.put("22c",new DexOpcodeType("22c", "B|A|op CCCC"));
-            patternFormMap.put("22cs",new DexOpcodeType("22cs", "B|A|op CCCC"));
-            patternFormMap.put("30t",new DexOpcodeType("30t", "ØØ|op AAAAloAAAAhi"));
-            patternFormMap.put("32x",new DexOpcodeType("32x", "ØØ|op AAAA BBBB"));
-            patternFormMap.put("31i",new DexOpcodeType("31i", "AA|op BBBBloBBBBhi"));
-            patternFormMap.put("31t",new DexOpcodeType("31t", "AA|op BBBBloBBBBhi"));
-            patternFormMap.put("31c",new DexOpcodeType("31c", "AA|op BBBBloBBBBhi"));
-            patternFormMap.put("35c",new DexOpcodeType("35c", "A|G|op BBBB F|E|D|C"));
-            patternFormMap.put("35ms",new DexOpcodeType("35ms", "A|G|op BBBB F|E|D|C"));
-            patternFormMap.put("35mi",new DexOpcodeType("35mi", "A|G|op BBBB F|E|D|C"));
-            patternFormMap.put("3rc",new DexOpcodeType("3rc", "AA|op BBBB CCCC"));
-            patternFormMap.put("3rms",new DexOpcodeType("3rms", "AA|op BBBB CCCC"));
-            patternFormMap.put("3rmi",new DexOpcodeType("3rmi", "AA|op BBBB CCCC"));
-            patternFormMap.put("51l",new DexOpcodeType("51l", "AA|op BBBBloBBBB BBBB BBBBhi"));
-            patternFormMap.put("33x",new DexOpcodeType("33x", "exop BB|AA CCCC"));
-            patternFormMap.put("32s",new DexOpcodeType("32s", "exop BB|AA CCCC"));
-            patternFormMap.put("40sc",new DexOpcodeType("40sc", "exop BBBBloBBBBhiAAAA"));
-            patternFormMap.put("41c",new DexOpcodeType("41c", "exop BBBBloBBBBhiAAAA  "));
-            patternFormMap.put("52c",new DexOpcodeType("52c", "exop CCCCloCCCChi    AAAA BBBB"));
-            patternFormMap.put("5rc",new DexOpcodeType("5rc", "exop BBBBloBBBBhi    AAAA CCCC"));
+            patternFormMap.put("00x", new DexOpcodeType("00x", "N/A"));
+            patternFormMap.put("10x", new DexOpcodeType("10x", "ØØ|op"));
+            patternFormMap.put("12x", new DexOpcodeType("12x", "B|A|op"));
+            patternFormMap.put("11n", new DexOpcodeType("11n", "B|A|op"));
+            patternFormMap.put("11x", new DexOpcodeType("11x", "AA|op"));
+            patternFormMap.put("10t", new DexOpcodeType("10t", "AA|op"));
+            patternFormMap.put("20t", new DexOpcodeType("20t", "ØØ|op AAAA"));
+            patternFormMap.put("20bc", new DexOpcodeType("20bc", "AA|op BBBB"));
+            patternFormMap.put("22x", new DexOpcodeType("22x", "AA|op BBBB"));
+            patternFormMap.put("21t", new DexOpcodeType("21t", "AA|op BBBB"));
+            patternFormMap.put("21s", new DexOpcodeType("21s", "AA|op BBBB"));
+            patternFormMap.put("21h", new DexOpcodeType("21h", "AA|op BBBB"));
+            patternFormMap.put("21c", new DexOpcodeType("21c", "AA|op BBBB"));
+            patternFormMap.put("23x", new DexOpcodeType("23x", "AA|op CC|BB"));
+            patternFormMap.put("22b", new DexOpcodeType("22b", "AA|op CC|BB"));
+            patternFormMap.put("22t", new DexOpcodeType("22t", "B|A|op CCCC"));
+            patternFormMap.put("22s", new DexOpcodeType("22s", "B|A|op CCCC"));
+            patternFormMap.put("22c", new DexOpcodeType("22c", "B|A|op CCCC"));
+            patternFormMap.put("22cs", new DexOpcodeType("22cs", "B|A|op CCCC"));
+            patternFormMap.put("30t", new DexOpcodeType("30t", "ØØ|op AAAAloAAAAhi"));
+            patternFormMap.put("32x", new DexOpcodeType("32x", "ØØ|op AAAA BBBB"));
+            patternFormMap.put("31i", new DexOpcodeType("31i", "AA|op BBBBloBBBBhi"));
+            patternFormMap.put("31t", new DexOpcodeType("31t", "AA|op BBBBloBBBBhi"));
+            patternFormMap.put("31c", new DexOpcodeType("31c", "AA|op BBBBloBBBBhi"));
+            patternFormMap.put("35c", new DexOpcodeType("35c", "A|G|op BBBB F|E|D|C"));
+            patternFormMap.put("35ms", new DexOpcodeType("35ms", "A|G|op BBBB F|E|D|C"));
+            patternFormMap.put("35mi", new DexOpcodeType("35mi", "A|G|op BBBB F|E|D|C"));
+            patternFormMap.put("3rc", new DexOpcodeType("3rc", "AA|op BBBB CCCC"));
+            patternFormMap.put("3rms", new DexOpcodeType("3rms", "AA|op BBBB CCCC"));
+            patternFormMap.put("3rmi", new DexOpcodeType("3rmi", "AA|op BBBB CCCC"));
+            patternFormMap.put("51l", new DexOpcodeType("51l", "AA|op BBBBloBBBB BBBB BBBBhi"));
+            patternFormMap.put("33x", new DexOpcodeType("33x", "exop BB|AA CCCC"));
+            patternFormMap.put("32s", new DexOpcodeType("32s", "exop BB|AA CCCC"));
+            patternFormMap.put("40sc", new DexOpcodeType("40sc", "exop BBBBloBBBBhiAAAA"));
+            patternFormMap.put("41c", new DexOpcodeType("41c", "exop BBBBloBBBBhiAAAA  "));
+            patternFormMap.put("52c", new DexOpcodeType("52c", "exop CCCCloCCCChi    AAAA BBBB"));
+            patternFormMap.put("5rc", new DexOpcodeType("5rc", "exop BBBBloBBBBhi    AAAA CCCC"));
         }
         return patternFormMap;
     }
@@ -542,6 +544,21 @@ public class Utils {
         return value;
     }
 
+    /**
+     * byte数组中取int数值，本方法适用于(低位在前，高位在后)的顺序。
+     *
+     * @param ary    byte数组
+     * @param offset 从数组的第offset位开始
+     * @return int数值
+     */
+    public static int bytesToInt(byte[] ary, int offset, int len) {
+        int value = 0;
+        for (int i = 0; i < len; i++) {
+            value |= (ary[offset + i] & 0xFF) << i * 8;
+        }
+        return value;
+    }
+
     public static String bytesToString(byte[] array, int start) {
         if (array == null) {
             return "null";
@@ -617,4 +634,49 @@ public class Utils {
             return 0;
         }
     }
+
+    public static long bytesToLong(byte[] ary, int offset) {
+        long value;
+        value = (ary[offset] & 0xFFL)
+                | (ary[offset + 1] & 0xFFL << 8)
+                | (ary[offset + 2] & 0xFFL << 16)
+                | (ary[offset + 3] & 0xFFL << 24)
+                | (ary[offset + 4] & 0xFFL << 32)
+                | (ary[offset + 5] & 0xFFL << 40)
+                | (ary[offset + 6] & 0xFFL << 48)
+                | (ary[offset + 7] & 0xFFL << 56);
+        return value;
+    }
+
+    /**
+     * byte数组中取int数值，本方法适用于(低位在前，高位在后)的顺序。
+     *
+     * @param ary    byte数组
+     * @param offset 从数组的第offset位开始
+     * @return int数值
+     */
+    public static long bytesToLong(byte[] ary, int offset, int len) {
+        long value = 0;
+        for (int i = 0; i < len; i++) {
+            value |= (ary[offset + i] & 0xFFL) << i * 8;
+        }
+        return value;
+    }
+
+    public static int bytesToIntFillRight(byte[] data, int off, int zwidth) {
+        int result = 0;
+        for (int i = zwidth; i > 0; i--) {
+            result = (result >>> 8) | ((data[off++] & 0xff) << 24);
+        }
+        return result;
+    }
+
+    public static long bytesToLongFillRight(byte[] data, int off, int zwidth) {
+        long result = 0;
+        for (int i = zwidth; i > 0; i--) {
+            result = (result >>> 8) | ((data[off++] & 0xffL) << 56);
+        }
+        return result;
+    }
+
 }
