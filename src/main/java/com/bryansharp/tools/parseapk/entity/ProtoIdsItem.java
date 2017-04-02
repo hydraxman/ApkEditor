@@ -48,6 +48,16 @@ public class ProtoIdsItem extends DexDataItem<ProtoRef, ProtoContent> {
             ProtoContent protoContent = new ProtoContent();
             protoContent.shorty = sItem.realData[refs[i].shortyIdx];
             protoContent.returnType = realData[refs[i].returnTypeIdx];
+            int off = refs[i].parametersOff;
+            if (off > 0) {
+                int size = Utils.bytesToInt(dexData, off);
+                off += 4;
+                for (int j = 0; j < size; j++) {
+                    int typeIndex = Utils.bytesToInt(dexData, off, 2);
+                    off += 2;
+                    protoContent.parameters.add(item.realData[typeIndex]);
+                }
+            }
             this.realData[i] = protoContent;
         }
     }
