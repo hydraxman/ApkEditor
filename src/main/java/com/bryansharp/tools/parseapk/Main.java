@@ -5,6 +5,6 @@ package com.bryansharp.tools.parseapk;
  */
 public class Main {
     public static void main(String[] args) {
-        ApkParser.parseApk("/Users/bushaopeng/IdeaProjects/EditApk/app-debug.apk");
+        ApkParser.parseApk("app-debug.apk");
     }
 }

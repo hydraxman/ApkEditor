@@ -1,28 +1,23 @@
 package com.bryansharp.tools.parseapk.entity.base;
 
 
+import com.bryansharp.tools.parseapk.DexData;
+import com.bryansharp.tools.parseapk.utils.DexOpcodeType;
 import com.bryansharp.tools.parseapk.utils.Utils;
 
 import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Created by bsp on 17/3/19.
  */
 public class DvmOpcode {
-    private static final int DATA_TYPE_FIELD = 1;
-    private static final int DATA_TYPE_METHOD = 2;
-    private static final int DATA_TYPE_TYPE = 3;
-    private static final int DATA_TYPE_STRING = 4;
-    public String form;
-    public String formForUse;
+    public DexOpcodeType opcodeType;
     public int opcode;
     public int opSize;
     public String pattern;
     public String name;
-    public int dataType;
-    public char dataPos1 = 'N';
-    public char dataPos2 = 'N';
-    public char dataPos3 = 'N';
+    public String[] dataTypes;
 
     public DvmOpcode(int opcode, String pattern, String name) {
         this.opcode = opcode;
@@ -32,15 +27,28 @@ public class DvmOpcode {
         if (c != 'r') {
             opSize = Integer.parseInt(c + "");
         }
-        this.form = Utils.getPatternFormMap().get(pattern);
-        if (this.form != null) {
-            this.formForUse = form.replaceAll("[|\\s]+", "").replaceAll("op.", "op").replace("lo", "").replace("hi", "");
-        }
+        this.opcodeType = Utils.getPatternFormMap().get(pattern);
+        studyThis();
+
     }
 
-    public DvmOpcode(int opcode, String pattern, String desc, String form) {
-        this(opcode, pattern, desc);
-        this.form = form;
+    private void studyThis() {
+        String matchType = null;
+        for (Map.Entry<String, String[]> entry : hashMap.entrySet()) {
+            String key = entry.getKey();
+            if (name.contains(key)) {
+                if (matchType != null) {
+                    if (matchType.length() < key.length()) {
+                        matchType = key;
+                    }
+                } else {
+                    matchType = key;
+                }
+            }
+        }
+        if (matchType != null) {
+            dataTypes = hashMap.get(matchType);
+        }
     }
 
     @Override
@@ -50,22 +58,27 @@ public class DvmOpcode {
                 ", opSize=" + opSize +
                 ", pattern='" + pattern + '\'' +
                 ", name='" + name + '\'' +
-                ", form='" + form + '\'' +
+                ", opcodeType='" + opcodeType + '\'' +
                 '}';
     }
 
-    public void studyOp() {
-        HashMap<String, Integer> hashMap = new HashMap<>();
-        hashMap.put("iget", DATA_TYPE_FIELD);
-        hashMap.put("sget", DATA_TYPE_FIELD);
-        hashMap.put("iput", DATA_TYPE_FIELD);
-        hashMap.put("sput", DATA_TYPE_FIELD);
-        hashMap.put("invoke", DATA_TYPE_METHOD);
-        hashMap.put("invoke-polymorphic", DATA_TYPE_METHOD);
-        hashMap.put("const-string", DATA_TYPE_STRING);
-        hashMap.put("const-class", DATA_TYPE_TYPE);
-        hashMap.put("check-cast", DATA_TYPE_TYPE);
-        hashMap.put("new", DATA_TYPE_TYPE);
+    static HashMap<String, String[]> hashMap = new HashMap<>();
+
+    static {
+        addTypeItem("iget", DexData.FIELD_IDS);
+        addTypeItem("sget", DexData.FIELD_IDS);
+        addTypeItem("iput", DexData.FIELD_IDS);
+        addTypeItem("sput", DexData.FIELD_IDS);
+        addTypeItem("invoke", DexData.METHOD_IDS);
+        addTypeItem("invoke-polymorphic", DexData.METHOD_IDS, DexData.PROTO_IDS);
+        addTypeItem("const-string", DexData.STRING_IDS);
+        addTypeItem("const-class", DexData.TYPE_IDS);
+        addTypeItem("check-cast", DexData.TYPE_IDS);
+        addTypeItem("new", DexData.TYPE_IDS);
+    }
+
+    private static void addTypeItem(String matchName, String... dataType) {
+        hashMap.put(matchName, dataType);
     }
 
 }
