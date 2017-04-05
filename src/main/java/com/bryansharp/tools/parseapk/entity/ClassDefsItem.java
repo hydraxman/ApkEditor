@@ -11,6 +11,8 @@ import com.bryansharp.tools.parseapk.entity.refs.ClassRef;
 import com.bryansharp.tools.parseapk.utils.LogUtils;
 import com.bryansharp.tools.parseapk.utils.Mutf8;
 
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -94,7 +96,6 @@ public class ClassDefsItem extends DexDataItem<ClassRef, ClassContent> {
     @Override
     public void parse4thRealData(Map<String, DexDataItem> dataItems, byte[] dexData) {
         TypeIdsItem item = (TypeIdsItem) dataItems.get(DexData.TYPE_IDS);
-        StringIdsItem sItem = (StringIdsItem) dataItems.get(DexData.STRING_IDS);
         for (int i = 0; i < realData.length; i++) {
             ClassContent content = realData[i];
             LogUtils.log("current parsing " + i);
@@ -102,80 +103,104 @@ public class ClassDefsItem extends DexDataItem<ClassRef, ClassContent> {
             ClassRef ref = refs[i];
             int staticValuesOff = ref.staticValuesOff;
             if (staticValuesOff > 0) {
-                int[] ints = Mutf8.readUnsignedLeb128(dexData, staticValuesOff);
-                int size = ints[0];
-                staticValuesOff += ints[1];
-                int argAndType = -1;
-                int arg, type, bytesSize;
-                while (size > 0) {
-                    argAndType = dexData[staticValuesOff++] & 0xff;
-                    type = argAndType & 0x1f;
-                    arg = (argAndType & 0xe0) >> 5;
-                    switch (type) {
-                        case EncodedValueReader.ENCODED_ARRAY:
-                            break;
-                        case EncodedValueReader.ENCODED_NULL:
-                            content.staticValues.add(null);
-                            break;
-                        case EncodedValueReader.ENCODED_LONG:
-                            bytesSize = arg + 1;
-                            content.staticValues.add(Utils.bytesToLong(dexData, staticValuesOff, bytesSize));
-                            staticValuesOff += bytesSize;
-                            break;
-                        case EncodedValueReader.ENCODED_BYTE:
-                            content.staticValues.add(dexData[staticValuesOff++]);
-                            break;
-                        case EncodedValueReader.ENCODED_SHORT:
-                            bytesSize = arg + 1;
-                            int shortValue = Utils.bytesToInt(dexData, staticValuesOff, bytesSize);
-                            staticValuesOff += bytesSize;
-                            content.staticValues.add(shortValue);
-                            break;
-                        case EncodedValueReader.ENCODED_CHAR:
-                            bytesSize = arg + 1;
-                            char charValue = (char) Utils.bytesToInt(dexData, staticValuesOff, bytesSize);
-                            staticValuesOff += bytesSize;
-                            content.staticValues.add(charValue);
-                            break;
-                        case EncodedValueReader.ENCODED_TYPE:
-                            bytesSize = arg + 1;
-                            int typeIndex = (char) Utils.bytesToInt(dexData, staticValuesOff, bytesSize);
-                            staticValuesOff += bytesSize;
-                            content.staticValues.add(item.realData[typeIndex]);
-                            break;
-                        case EncodedValueReader.ENCODED_FLOAT:
-                            bytesSize = arg + 1;
-                            int floatInt = Utils.bytesToIntFillRight(dexData, staticValuesOff, bytesSize);
-                            content.staticValues.add(Float.intBitsToFloat(floatInt));
-                            staticValuesOff += bytesSize;
-                            break;
-                        case EncodedValueReader.ENCODED_DOUBLE:
-                            bytesSize = arg + 1;
-                            long floatLong = Utils.bytesToLongFillRight(dexData, staticValuesOff, bytesSize);
-                            content.staticValues.add(Double.longBitsToDouble(floatLong));
-                            staticValuesOff += bytesSize;
-                            break;
-                        case EncodedValueReader.ENCODED_BOOLEAN:
-                            content.staticValues.add(arg == 0 ? false : true);
-                            break;
-                        case EncodedValueReader.ENCODED_STRING: {
-                            bytesSize = arg + 1;
-                            int stringIndex = Utils.bytesToInt(dexData, staticValuesOff, bytesSize);
-                            staticValuesOff += bytesSize;
-                            content.staticValues.add(sItem.realData[stringIndex]);
-                            break;
-                        }
-                        case EncodedValueReader.ENCODED_INT: {
-                            bytesSize = arg + 1;
-                            int intValue = Utils.bytesToInt(dexData, staticValuesOff, bytesSize);
-                            staticValuesOff += bytesSize;
-                            content.staticValues.add(intValue);
-                            break;
-                        }
+                content.staticValues.addAll(readEncodedArray(dexData, dataItems, staticValuesOff));
+            }
+            int annotationOff = ref.annotationsOff;
+            if (annotationOff > 0) {
+                int classAnnotationsOff = Utils.bytesToInt(dexData, annotationOff);
+                if (classAnnotationsOff > 0) {
+                    int sizeOfAnnotSet = Utils.bytesToInt(dexData, classAnnotationsOff);
+                    classAnnotationsOff += 4;
+                    while (sizeOfAnnotSet > 0) {
+                        int annotationItemOff = Utils.bytesToInt(dexData, classAnnotationsOff);
+                        classAnnotationsOff += 4;
+                        sizeOfAnnotSet--;
                     }
-                    size--;
                 }
+                annotationOff += 4;
+
             }
         }
+    }
+
+    private List<Object> readEncodedArray(byte[] byteData, Map<String, DexDataItem> dataItems, int off) {
+        LinkedList<Object> array = new LinkedList<>();
+        TypeIdsItem item = (TypeIdsItem) dataItems.get(DexData.TYPE_IDS);
+        StringIdsItem sItem = (StringIdsItem) dataItems.get(DexData.STRING_IDS);
+        int[] ints = Mutf8.readUnsignedLeb128(byteData, off);
+        int size = ints[0];
+        off += ints[1];
+        int argAndType, arg, type, bytesSize;
+        while (size > 0) {
+            argAndType = byteData[off++] & 0xff;
+            type = argAndType & 0x1f;
+            arg = (argAndType & 0xe0) >> 5;
+            switch (type) {
+                case EncodedValueReader.ENCODED_ARRAY:
+                    //todo 解决off传入传出的问题
+                    array.add(readEncodedArray(byteData, dataItems, off));
+                    break;
+                case EncodedValueReader.ENCODED_NULL:
+                    array.add(null);
+                    break;
+                case EncodedValueReader.ENCODED_LONG:
+                    bytesSize = arg + 1;
+                    array.add(Utils.bytesToLong(byteData, off, bytesSize));
+                    off += bytesSize;
+                    break;
+                case EncodedValueReader.ENCODED_BYTE:
+                    array.add(byteData[off++]);
+                    break;
+                case EncodedValueReader.ENCODED_SHORT:
+                    bytesSize = arg + 1;
+                    int shortValue = Utils.bytesToInt(byteData, off, bytesSize);
+                    off += bytesSize;
+                    array.add(shortValue);
+                    break;
+                case EncodedValueReader.ENCODED_CHAR:
+                    bytesSize = arg + 1;
+                    char charValue = (char) Utils.bytesToInt(byteData, off, bytesSize);
+                    off += bytesSize;
+                    array.add(charValue);
+                    break;
+                case EncodedValueReader.ENCODED_TYPE:
+                    bytesSize = arg + 1;
+                    int typeIndex = (char) Utils.bytesToInt(byteData, off, bytesSize);
+                    off += bytesSize;
+                    array.add(item.realData[typeIndex]);
+                    break;
+                case EncodedValueReader.ENCODED_FLOAT:
+                    bytesSize = arg + 1;
+                    int floatInt = Utils.bytesToIntFillRight(byteData, off, bytesSize);
+                    array.add(Float.intBitsToFloat(floatInt));
+                    off += bytesSize;
+                    break;
+                case EncodedValueReader.ENCODED_DOUBLE:
+                    bytesSize = arg + 1;
+                    long floatLong = Utils.bytesToLongFillRight(byteData, off, bytesSize);
+                    array.add(Double.longBitsToDouble(floatLong));
+                    off += bytesSize;
+                    break;
+                case EncodedValueReader.ENCODED_BOOLEAN:
+                    array.add(arg == 0 ? false : true);
+                    break;
+                case EncodedValueReader.ENCODED_STRING: {
+                    bytesSize = arg + 1;
+                    int stringIndex = Utils.bytesToInt(byteData, off, bytesSize);
+                    off += bytesSize;
+                    array.add(sItem.realData[stringIndex]);
+                    break;
+                }
+                case EncodedValueReader.ENCODED_INT: {
+                    bytesSize = arg + 1;
+                    int intValue = Utils.bytesToInt(byteData, off, bytesSize);
+                    off += bytesSize;
+                    array.add(intValue);
+                    break;
+                }
+            }
+            size--;
+        }
+        return array;
     }
 }
