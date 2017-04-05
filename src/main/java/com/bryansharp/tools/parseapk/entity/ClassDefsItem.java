@@ -4,7 +4,11 @@ package com.bryansharp.tools.parseapk.entity;
 import com.android.dex.EncodedValueCodec;
 import com.android.dex.EncodedValueReader;
 import com.bryansharp.tools.parseapk.DexData;
+import com.bryansharp.tools.parseapk.entity.data.AnnotationItemContent;
+import com.bryansharp.tools.parseapk.entity.data.AnnotationNV;
+import com.bryansharp.tools.parseapk.entity.data.AnnotationsDirItem;
 import com.bryansharp.tools.parseapk.entity.data.ClassContent;
+import com.bryansharp.tools.parseapk.utils.IntPointer;
 import com.bryansharp.tools.parseapk.utils.Utils;
 import com.bryansharp.tools.parseapk.entity.base.DexDataItem;
 import com.bryansharp.tools.parseapk.entity.refs.ClassRef;
@@ -95,7 +99,8 @@ public class ClassDefsItem extends DexDataItem<ClassRef, ClassContent> {
 
     @Override
     public void parse4thRealData(Map<String, DexDataItem> dataItems, byte[] dexData) {
-        TypeIdsItem item = (TypeIdsItem) dataItems.get(DexData.TYPE_IDS);
+        MethodIdsItem mItem = (MethodIdsItem) dataItems.get(DexData.METHOD_IDS);
+        FieldIdsItem fItem = (FieldIdsItem) dataItems.get(DexData.FIELD_IDS);
         for (int i = 0; i < realData.length; i++) {
             ClassContent content = realData[i];
             LogUtils.log("current parsing " + i);
@@ -103,104 +108,97 @@ public class ClassDefsItem extends DexDataItem<ClassRef, ClassContent> {
             ClassRef ref = refs[i];
             int staticValuesOff = ref.staticValuesOff;
             if (staticValuesOff > 0) {
-                content.staticValues.addAll(readEncodedArray(dexData, dataItems, staticValuesOff));
+                content.staticValues.addAll(Utils.readEncodedArray(dexData, dataItems, IntPointer.get(staticValuesOff)));
             }
-            int annotationOff = ref.annotationsOff;
-            if (annotationOff > 0) {
-                int classAnnotationsOff = Utils.bytesToInt(dexData, annotationOff);
+            int classDefAnnotationOff = ref.annotationsOff;
+            if (classDefAnnotationOff > 0) {
+                int classAnnotationsOff = Utils.bytesToInt(dexData, classDefAnnotationOff);
+                classDefAnnotationOff += 4;
+                AnnotationsDirItem annotationsDirItem = new AnnotationsDirItem();
+                annotationsDirItem.classAnnoOff = classAnnotationsOff;
                 if (classAnnotationsOff > 0) {
-                    int sizeOfAnnotSet = Utils.bytesToInt(dexData, classAnnotationsOff);
-                    classAnnotationsOff += 4;
-                    while (sizeOfAnnotSet > 0) {
-                        int annotationItemOff = Utils.bytesToInt(dexData, classAnnotationsOff);
-                        classAnnotationsOff += 4;
-                        sizeOfAnnotSet--;
+                    annotationsDirItem.annotations.addAll(readAnnotations(dataItems, dexData, classAnnotationsOff));
+                }
+                annotationsDirItem.fieldsSize = Utils.bytesToInt(dexData, classDefAnnotationOff);
+                annotationsDirItem.fieldAnnotations = new AnnotationsDirItem.FieldAnnotations[annotationsDirItem.fieldsSize];
+                classDefAnnotationOff += 4;
+                annotationsDirItem.annotatedMethodsSize = Utils.bytesToInt(dexData, classDefAnnotationOff);
+                annotationsDirItem.methodAnnotations = new AnnotationsDirItem.MethodAnnotations[annotationsDirItem.annotatedMethodsSize];
+                classDefAnnotationOff += 4;
+                annotationsDirItem.annotatedParametersSize = Utils.bytesToInt(dexData, classDefAnnotationOff);
+                annotationsDirItem.paramAnnotations = new AnnotationsDirItem.ParamAnnotations[annotationsDirItem.annotatedParametersSize];
+                classDefAnnotationOff += 4;
+                int fieldsSize = annotationsDirItem.fieldsSize;
+                if (fieldsSize > 0) {
+                    while (fieldsSize > 0) {
+                        annotationsDirItem.fieldAnnotations[fieldsSize - 1] = new AnnotationsDirItem.FieldAnnotations();
+                        int fieldIndex = Utils.bytesToInt(dexData, classDefAnnotationOff);
+                        classDefAnnotationOff += 4;
+                        annotationsDirItem.fieldAnnotations[fieldsSize - 1].fieldContent = fItem.realData[fieldIndex];
+                        int annotationsOff = Utils.bytesToInt(dexData, classDefAnnotationOff);
+                        classDefAnnotationOff += 4;
+                        annotationsDirItem.fieldAnnotations[fieldsSize - 1].annotations.addAll(readAnnotations(dataItems, dexData, annotationsOff));
+                        fieldsSize--;
                     }
                 }
-                annotationOff += 4;
-
+                int annotatedMethodsSize = annotationsDirItem.annotatedMethodsSize;
+                if (annotatedMethodsSize > 0) {
+                    while (annotatedMethodsSize > 0) {
+                        annotationsDirItem.methodAnnotations[annotatedMethodsSize - 1] = new AnnotationsDirItem.MethodAnnotations();
+                        int methodIdx = Utils.bytesToInt(dexData, classDefAnnotationOff);
+                        classDefAnnotationOff += 4;
+                        annotationsDirItem.methodAnnotations[annotatedMethodsSize - 1].methodContent = mItem.realData[methodIdx];
+                        int annotationsOff = Utils.bytesToInt(dexData, classDefAnnotationOff);
+                        classDefAnnotationOff += 4;
+                        annotationsDirItem.methodAnnotations[annotatedMethodsSize - 1].annotations.addAll(readAnnotations(dataItems, dexData, annotationsOff));
+                        annotatedMethodsSize--;
+                    }
+                }
+                int annotatedParametersSize = annotationsDirItem.annotatedParametersSize;
+                if (annotatedParametersSize > 0) {
+                    while (annotatedParametersSize > 0) {
+                        annotationsDirItem.paramAnnotations[annotatedParametersSize - 1] = new AnnotationsDirItem.ParamAnnotations();
+                        int methodIdx = Utils.bytesToInt(dexData, classDefAnnotationOff);
+                        classDefAnnotationOff += 4;
+                        annotationsDirItem.paramAnnotations[annotatedParametersSize - 1].methodContent = mItem.realData[methodIdx];
+                        int annotationsOff = Utils.bytesToInt(dexData, classDefAnnotationOff);
+                        classDefAnnotationOff += 4;
+                        int sizeOfRefList = Utils.bytesToInt(dexData, annotationsOff);
+                        annotationsDirItem.paramAnnotations[annotatedParametersSize - 1].annotationSetRefList = new AnnotationsDirItem.AnnotationSetRefList[sizeOfRefList];
+                        annotationsOff += 4;
+                        while (sizeOfRefList > 0) {
+                            int annotationsOffInRef = Utils.bytesToInt(dexData, annotationsOff);
+                            annotationsOff += 4;
+                            annotationsDirItem.paramAnnotations[annotatedParametersSize - 1].annotationSetRefList[sizeOfRefList - 1] = new AnnotationsDirItem.AnnotationSetRefList();
+                            annotationsDirItem.paramAnnotations[annotatedParametersSize - 1].annotationSetRefList[sizeOfRefList - 1].annotations.addAll(readAnnotations(dataItems, dexData, annotationsOffInRef));
+                            sizeOfRefList--;
+                        }
+                        annotatedParametersSize--;
+                    }
+                }
+                content.annotationsDirItem = annotationsDirItem;
             }
         }
     }
 
-    private List<Object> readEncodedArray(byte[] byteData, Map<String, DexDataItem> dataItems, int off) {
-        LinkedList<Object> array = new LinkedList<>();
-        TypeIdsItem item = (TypeIdsItem) dataItems.get(DexData.TYPE_IDS);
-        StringIdsItem sItem = (StringIdsItem) dataItems.get(DexData.STRING_IDS);
-        int[] ints = Mutf8.readUnsignedLeb128(byteData, off);
-        int size = ints[0];
-        off += ints[1];
-        int argAndType, arg, type, bytesSize;
-        while (size > 0) {
-            argAndType = byteData[off++] & 0xff;
-            type = argAndType & 0x1f;
-            arg = (argAndType & 0xe0) >> 5;
-            switch (type) {
-                case EncodedValueReader.ENCODED_ARRAY:
-                    //todo 解决off传入传出的问题
-                    array.add(readEncodedArray(byteData, dataItems, off));
-                    break;
-                case EncodedValueReader.ENCODED_NULL:
-                    array.add(null);
-                    break;
-                case EncodedValueReader.ENCODED_LONG:
-                    bytesSize = arg + 1;
-                    array.add(Utils.bytesToLong(byteData, off, bytesSize));
-                    off += bytesSize;
-                    break;
-                case EncodedValueReader.ENCODED_BYTE:
-                    array.add(byteData[off++]);
-                    break;
-                case EncodedValueReader.ENCODED_SHORT:
-                    bytesSize = arg + 1;
-                    int shortValue = Utils.bytesToInt(byteData, off, bytesSize);
-                    off += bytesSize;
-                    array.add(shortValue);
-                    break;
-                case EncodedValueReader.ENCODED_CHAR:
-                    bytesSize = arg + 1;
-                    char charValue = (char) Utils.bytesToInt(byteData, off, bytesSize);
-                    off += bytesSize;
-                    array.add(charValue);
-                    break;
-                case EncodedValueReader.ENCODED_TYPE:
-                    bytesSize = arg + 1;
-                    int typeIndex = (char) Utils.bytesToInt(byteData, off, bytesSize);
-                    off += bytesSize;
-                    array.add(item.realData[typeIndex]);
-                    break;
-                case EncodedValueReader.ENCODED_FLOAT:
-                    bytesSize = arg + 1;
-                    int floatInt = Utils.bytesToIntFillRight(byteData, off, bytesSize);
-                    array.add(Float.intBitsToFloat(floatInt));
-                    off += bytesSize;
-                    break;
-                case EncodedValueReader.ENCODED_DOUBLE:
-                    bytesSize = arg + 1;
-                    long floatLong = Utils.bytesToLongFillRight(byteData, off, bytesSize);
-                    array.add(Double.longBitsToDouble(floatLong));
-                    off += bytesSize;
-                    break;
-                case EncodedValueReader.ENCODED_BOOLEAN:
-                    array.add(arg == 0 ? false : true);
-                    break;
-                case EncodedValueReader.ENCODED_STRING: {
-                    bytesSize = arg + 1;
-                    int stringIndex = Utils.bytesToInt(byteData, off, bytesSize);
-                    off += bytesSize;
-                    array.add(sItem.realData[stringIndex]);
-                    break;
-                }
-                case EncodedValueReader.ENCODED_INT: {
-                    bytesSize = arg + 1;
-                    int intValue = Utils.bytesToInt(byteData, off, bytesSize);
-                    off += bytesSize;
-                    array.add(intValue);
-                    break;
-                }
+    private List<AnnotationItemContent> readAnnotations(Map<String, DexDataItem> dataItems, byte[] dexData, int annotationsOff) {
+        LinkedList<AnnotationItemContent> annotations = new LinkedList<>();
+        int sizeOfAnnotSet = Utils.bytesToInt(dexData, annotationsOff);
+        annotationsOff += 4;
+        while (sizeOfAnnotSet > 0) {
+            int annotationItemOff = Utils.bytesToInt(dexData, annotationsOff);
+            if (annotationItemOff > 0) {
+                AnnotationItemContent annotation = new AnnotationItemContent();
+                annotation.offset = annotationItemOff;
+                IntPointer intPointer = IntPointer.get(annotationItemOff);
+                annotation.fillData(dexData, intPointer, dataItems);
+                annotations.add(annotation);
             }
-            size--;
+            annotationsOff += 4;
+            sizeOfAnnotSet--;
         }
-        return array;
+        return annotations;
     }
+
+
 }

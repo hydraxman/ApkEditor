@@ -2,10 +2,19 @@ package com.bryansharp.tools.parseapk.utils;
 
 
 import com.android.dex.DexException;
+import com.android.dex.EncodedValueReader;
 import com.android.dex.util.ByteInput;
+import com.bryansharp.tools.parseapk.DexData;
+import com.bryansharp.tools.parseapk.entity.FieldIdsItem;
+import com.bryansharp.tools.parseapk.entity.MethodIdsItem;
+import com.bryansharp.tools.parseapk.entity.StringIdsItem;
+import com.bryansharp.tools.parseapk.entity.TypeIdsItem;
+import com.bryansharp.tools.parseapk.entity.base.DexDataItem;
 import com.bryansharp.tools.parseapk.entity.base.DvmOpcode;
 
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -679,4 +688,91 @@ public class Utils {
         return result;
     }
 
+    public static List<Object> readEncodedArray(byte[] byteData, Map<String, DexDataItem> dataItems, IntPointer off) {
+        LinkedList<Object> array = new LinkedList<>();
+        int[] ints = Mutf8.readUnsignedLeb128(byteData, off.getValue());
+        int size = ints[0];
+        off.add(ints[1]);
+        while (size > 0) {
+            array.add(readEncodedValue(byteData, dataItems, off));
+            size--;
+        }
+        return array;
+    }
+
+    public static Object readEncodedValue(byte[] byteData, Map<String, DexDataItem> dataItems, IntPointer off) {
+        TypeIdsItem item = (TypeIdsItem) dataItems.get(DexData.TYPE_IDS);
+        StringIdsItem sItem = (StringIdsItem) dataItems.get(DexData.STRING_IDS);
+        MethodIdsItem mItem = (MethodIdsItem) dataItems.get(DexData.METHOD_IDS);
+        FieldIdsItem fItem = (FieldIdsItem) dataItems.get(DexData.FIELD_IDS);
+        int argAndType, arg, type, bytesSize;
+        argAndType = byteData[off.addOne()] & 0xff;
+        type = argAndType & 0x1f;
+        arg = (argAndType & 0xe0) >> 5;
+        switch (type) {
+            case EncodedValueReader.ENCODED_ARRAY:
+                //解决off传入传出的问题使用的intPointer
+                return readEncodedArray(byteData, dataItems, off);
+            case EncodedValueReader.ENCODED_NULL:
+                return null;
+            case EncodedValueReader.ENCODED_LONG:
+                bytesSize = arg + 1;
+                off.add(bytesSize);
+                return Utils.bytesToLong(byteData, off.getValue(), bytesSize);
+            case EncodedValueReader.ENCODED_BYTE:
+                return byteData[off.addOne()];
+            case EncodedValueReader.ENCODED_SHORT:
+                bytesSize = arg + 1;
+                int shortValue = Utils.bytesToInt(byteData, off.getValue(), bytesSize);
+                off.add(bytesSize);
+                return shortValue;
+            case EncodedValueReader.ENCODED_CHAR:
+                bytesSize = arg + 1;
+                char charValue = (char) Utils.bytesToInt(byteData, off.getValue(), bytesSize);
+                off.add(bytesSize);
+                return charValue;
+            case EncodedValueReader.ENCODED_TYPE:
+                bytesSize = arg + 1;
+                int typeIndex = (char) Utils.bytesToInt(byteData, off.getValue(), bytesSize);
+                off.add(bytesSize);
+                return item.realData[typeIndex];
+            case EncodedValueReader.ENCODED_FLOAT:
+                bytesSize = arg + 1;
+                int floatInt = Utils.bytesToIntFillRight(byteData, off.getValue(), bytesSize);
+                off.add(bytesSize);
+                return Float.intBitsToFloat(floatInt);
+            case EncodedValueReader.ENCODED_DOUBLE:
+                bytesSize = arg + 1;
+                long floatLong = Utils.bytesToLongFillRight(byteData, off.getValue(), bytesSize);
+                off.add(bytesSize);
+                return Double.longBitsToDouble(floatLong);
+            case EncodedValueReader.ENCODED_BOOLEAN:
+                return arg == 0 ? false : true;
+            case EncodedValueReader.ENCODED_STRING: {
+                bytesSize = arg + 1;
+                int stringIndex = Utils.bytesToInt(byteData, off.getValue(), bytesSize);
+                off.add(bytesSize);
+                return sItem.realData[stringIndex];
+            }
+            case EncodedValueReader.ENCODED_INT: {
+                bytesSize = arg + 1;
+                int intValue = Utils.bytesToInt(byteData, off.getValue(), bytesSize);
+                off.add(bytesSize);
+                return intValue;
+            }
+            case EncodedValueReader.ENCODED_METHOD: {
+                bytesSize = arg + 1;
+                int intValue = Utils.bytesToInt(byteData, off.getValue(), bytesSize);
+                off.add(bytesSize);
+                return mItem.realData[intValue];
+            }
+            case EncodedValueReader.ENCODED_ENUM:
+            case EncodedValueReader.ENCODED_FIELD:
+                bytesSize = arg + 1;
+                int intValue = Utils.bytesToInt(byteData, off.getValue(), bytesSize);
+                off.add(bytesSize);
+                return fItem.realData[intValue];
+        }
+        return null;
+    }
 }

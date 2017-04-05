@@ -1,6 +1,7 @@
 package com.bryansharp.tools.parseapk.entity.data;
 
 
+import com.android.dx.dex.file.AnnotationsDirectoryItem;
 import com.bryansharp.tools.parseapk.entity.FieldIdsItem;
 import com.bryansharp.tools.parseapk.entity.MethodIdsItem;
 import com.bryansharp.tools.parseapk.DexData;
@@ -23,7 +24,7 @@ public class ClassContent {
     public String sourceFile;
     public ClassData classData;
     public List<Object> staticValues=new LinkedList<>();
-
+    public AnnotationsDirItem annotationsDirItem;
     @Override
     public String toString() {
         return "\nClassContent{" +
@@ -32,6 +33,7 @@ public class ClassContent {
                 ", sourceFile='" + sourceFile + '\'' +
                 ", classData=" + classData +
                 ", staticValues=" + staticValues +
+                ", annotationsDirItem=" + annotationsDirItem +
                 '}';
     }
 
