@@ -217,6 +217,35 @@ class ApkSigner {
         }
     }
 
+    public static void replaceInApk(String nameToBeReplaced, File replaceTo, JarFile in, String outFile)
+            throws IOException {
+        byte[] buffer = new byte[4096];
+        Manifest manifest = in.getManifest();
+        Map<String, Attributes> entries = manifest.getEntries();
+        JarOutputStream out = new JarOutputStream(new FileOutputStream(outFile));
+        for (String name : entries.keySet()) {
+            JarEntry inEntry = in.getJarEntry(name);
+            if (inEntry.getMethod() == 0) {
+                out.putNextEntry(new JarEntry(inEntry));
+            } else {
+                out.putNextEntry(new JarEntry(name));
+            }
+            InputStream data = null;
+            if (name.equals(nameToBeReplaced)) {
+                data = new FileInputStream(replaceTo);
+            } else {
+                data = in.getInputStream(inEntry);
+            }
+            int num;
+            while ((num = data.read(buffer)) > 0) {
+                out.write(buffer, 0, num);
+            }
+            out.flush();
+            data.close();
+        }
+        out.close();
+    }
+
     public static void signFile(String publickeyX509, String privatekeyPk8, String inputFile, String outputFile) {
 
         JarFile inputJar = null;
