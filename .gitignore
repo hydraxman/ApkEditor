@@ -2,4 +2,6 @@ build
 /*.txt
 .idea
 .gradle
-
+out
+appDebug
+appDebugDex
