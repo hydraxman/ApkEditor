@@ -6,3 +6,6 @@ out
 appDebug
 appDebugDex
 app-debug.apk
+GPClasses.jar
+out.dex
+com.android.vending-signed.apk

@@ -1,5 +1,7 @@
 package com.bryansharp.tools.parseapk;
 
+import com.bryansharp.tools.parseapk.utils.LogUtils;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.jar.JarFile;
@@ -15,7 +17,9 @@ public class Main {
 
             org.jf.smali.Main.main(new String[]{"assemble", new File("out").getAbsolutePath()});
             ApkSigner.replaceInApk("classes.dex", new File("out.dex"), new JarFile("com.android.vending.apk"), "com.android.vending-replaced.apk");
+            LogUtils.log("dex is created");
             ApkSigner.signFile("publickey.rsa.pem", "privatekey.pk8", "com.android.vending-replaced.apk", "com.android.vending-signed.apk");
+            new File("com.android.vending-replaced.apk").delete();
         } catch (IOException e) {
             e.printStackTrace();
         }
