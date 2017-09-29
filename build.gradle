@@ -15,6 +15,7 @@ dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.11'
     compile "commons-io:commons-io:1.4"
     compile 'commons-codec:commons-codec:1.6'
+    compile project(':play-store-api')
 //    compile 'asm:asm:3.3.1'
 }
 
