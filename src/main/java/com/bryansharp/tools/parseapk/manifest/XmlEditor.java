@@ -251,7 +251,7 @@ public class XmlEditor {
         int attrname = getStrIndex(attrName);
         int attrvalue = getStrIndex(attrValue);
         int attruri = getStrIndex(prefixStr);
-        ;
+
         int attrtype = type[0];//属性类型
         int attrdata = type[1];//属性值，是int类型
 

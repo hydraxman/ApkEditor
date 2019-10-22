@@ -1,7 +1,8 @@
 package com.bryansharp.tools.parseapk.manifest.chunk;
 
-import cn.wjdiankong.main.ChunkTypeNumber;
-import cn.wjdiankong.main.Utils;
+
+import com.bryansharp.tools.parseapk.manifest.ChunkTypeNumber;
+import com.bryansharp.tools.parseapk.manifest.Utils;
 
 public class EndTagChunk implements Chunk {
 

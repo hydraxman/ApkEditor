@@ -1,43 +1,5 @@
 package com.bryansharp.tools.parseapk;
 
-import java.io.BufferedReader;
-import java.io.ByteArrayOutputStream;
-import java.io.DataInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.FilterOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.PrintStream;
-import java.security.DigestOutputStream;
-import java.security.GeneralSecurityException;
-import java.security.Key;
-import java.security.KeyFactory;
-import java.security.MessageDigest;
-import java.security.PrivateKey;
-import java.security.Signature;
-import java.security.SignatureException;
-import java.security.cert.CertificateFactory;
-import java.security.cert.X509Certificate;
-import java.security.spec.InvalidKeySpecException;
-import java.security.spec.KeySpec;
-import java.security.spec.PKCS8EncodedKeySpec;
-import java.util.Enumeration;
-import java.util.Map;
-import java.util.jar.Attributes;
-import java.util.jar.JarEntry;
-import java.util.jar.JarFile;
-import java.util.jar.JarOutputStream;
-import java.util.jar.Manifest;
-
-import javax.crypto.Cipher;
-import javax.crypto.EncryptedPrivateKeyInfo;
-import javax.crypto.SecretKeyFactory;
-import javax.crypto.spec.PBEKeySpec;
-
 import sun.misc.BASE64Encoder;
 import sun.security.pkcs.ContentInfo;
 import sun.security.pkcs.PKCS7;
@@ -45,7 +7,23 @@ import sun.security.pkcs.SignerInfo;
 import sun.security.x509.AlgorithmId;
 import sun.security.x509.X500Name;
 
-class ApkSigner {
+import javax.crypto.Cipher;
+import javax.crypto.EncryptedPrivateKeyInfo;
+import javax.crypto.SecretKeyFactory;
+import javax.crypto.spec.PBEKeySpec;
+import java.io.*;
+import java.security.*;
+import java.security.cert.CertificateFactory;
+import java.security.cert.X509Certificate;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.KeySpec;
+import java.security.spec.PKCS8EncodedKeySpec;
+import java.util.Enumeration;
+import java.util.Map;
+import java.util.jar.*;
+import java.util.zip.ZipEntry;
+
+public class ApkSigner {
     private static X509Certificate readPublicKey(File file)
             throws IOException, GeneralSecurityException {
         FileInputStream input = new FileInputStream(file);
@@ -225,7 +203,7 @@ class ApkSigner {
         JarOutputStream out = new JarOutputStream(new FileOutputStream(outFile));
         for (String name : entries.keySet()) {
             JarEntry inEntry = in.getJarEntry(name);
-            if (inEntry.getMethod() == 0) {
+            if (inEntry.getMethod() == ZipEntry.STORED) {
                 out.putNextEntry(new JarEntry(inEntry));
             } else {
                 out.putNextEntry(new JarEntry(name));
