@@ -13,7 +13,8 @@ repositories {
 dependencies {
     compile fileTree(dir: 'libs', include: '*.jar')
     testCompile group: 'junit', name: 'junit', version: '4.11'
-    compile "commons-io:commons-io:1.4"
+    compile group: 'commons-lang', name: 'commons-lang', version: '2.6'
+    compile group: 'commons-io', name: 'commons-io', version: '2.5'
     compile 'commons-codec:commons-codec:1.6'
 //    compile 'asm:asm:3.3.1'
 }

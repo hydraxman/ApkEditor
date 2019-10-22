@@ -37,7 +37,7 @@ public final class OutputCollector {
 
     /**
      * {@code null-ok;} suffix for the output, or {@code null} if the suffix
-     * has been appended to the main output (by {@link #appendSuffixToOutput})
+     * has been appended to the manifest output (by {@link #appendSuffixToOutput})
      */
     private ArrayList<DalvInsn> suffix;
 

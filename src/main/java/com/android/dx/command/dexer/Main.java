@@ -267,7 +267,7 @@ public class Main {
     public static String getTooManyIdsErrorMessage() {
         if (args.multiDex) {
             return "The list of classes given in " + Arguments.MAIN_DEX_LIST_OPTION +
-                    " is too big and does not fit in the main dex.";
+                    " is too big and does not fit in the manifest dex.";
         } else {
             return "You may try using " + Arguments.MULTI_DEX_OPTION + " option.";
         }
@@ -493,18 +493,18 @@ public class Main {
 
         try {
             if (args.mainDexListFile != null) {
-                // with --main-dex-list
+                // with --manifest-dex-list
                 FileNameFilter mainPassFilter = args.strictNameCheck ? new MainDexListFilter() :
                         new BestEffortMainDexListFilter();
 
-                // forced in main dex
+                // forced in manifest dex
                 for (int i = 0; i < fileNames.length; i++) {
                     processOne(fileNames[i], mainPassFilter);
                 }
 
                 if (dexOutputArrays.size() > 0) {
                     throw new DexException("Too many classes in " + Arguments.MAIN_DEX_LIST_OPTION
-                            + ", main dex capacity exceeded");
+                            + ", manifest dex capacity exceeded");
                 }
 
                 if (args.minimalMainDex) {
@@ -517,7 +517,7 @@ public class Main {
                     processOne(fileNames[i], new NotFilter(mainPassFilter));
                 }
             } else {
-                // without --main-dex-list
+                // without --manifest-dex-list
                 for (int i = 0; i < fileNames.length; i++) {
                     processOne(fileNames[i], ClassPathOpener.acceptAll);
                 }
@@ -1196,9 +1196,9 @@ public class Main {
      */
     public static class Arguments {
 
-        private static final String MINIMAL_MAIN_DEX_OPTION = "--minimal-main-dex";
+        private static final String MINIMAL_MAIN_DEX_OPTION = "--minimal-manifest-dex";
 
-        private static final String MAIN_DEX_LIST_OPTION = "--main-dex-list";
+        private static final String MAIN_DEX_LIST_OPTION = "--manifest-dex-list";
 
         private static final String MULTI_DEX_OPTION = "--multi-dex";
 
@@ -1338,13 +1338,13 @@ public class Main {
         public boolean multiDex = false;
 
         /**
-         * Optional file containing a list of class files containing classes to be forced in main
+         * Optional file containing a list of class files containing classes to be forced in manifest
          * dex
          */
         public String mainDexListFile = null;
 
         /**
-         * Produce the smallest possible main dex. Ignored unless multiDex is true and
+         * Produce the smallest possible manifest dex. Ignored unless multiDex is true and
          * mainDexListFile is specified and non empty.
          */
         public boolean minimalMainDex = false;

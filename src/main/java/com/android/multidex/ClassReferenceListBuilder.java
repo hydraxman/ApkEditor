@@ -47,7 +47,7 @@ import java.util.zip.ZipFile;
  * directories, they constitute in a classpath in with the classes named by the first argument
  * will be searched. Each searched class must be found. On each of this classes are searched for
  * their dependencies to other classes. Finally the tools prints on standard output a list of class
- * files names suitable as content of the file argument --main-dex-list of dx.
+ * files names suitable as content of the file argument --manifest-dex-list of dx.
  */
 public class ClassReferenceListBuilder {
 
@@ -187,7 +187,7 @@ public class ClassReferenceListBuilder {
     }
 
     /**
-     * Returns a list of classes to keep. This can be passed to dx as a file with --main-dex-list.
+     * Returns a list of classes to keep. This can be passed to dx as a file with --manifest-dex-list.
      */
     public Set<String> getMainDexList() {
         Set<String> resultSet = new HashSet<String>(toKeep.size());

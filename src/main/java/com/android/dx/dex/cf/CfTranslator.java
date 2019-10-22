@@ -100,7 +100,7 @@ public class CfTranslator {
     }
 
     /**
-     * Performs the main act of translation. This method is separated
+     * Performs the manifest act of translation. This method is separated
      * from {@link #translate} just to keep things a bit simpler in
      * terms of exception handling.
      *

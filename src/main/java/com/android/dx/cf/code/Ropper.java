@@ -1080,7 +1080,7 @@ public final class Ropper {
         if (!synchNeedsExceptionHandler) {
             /*
              * The method being converted either isn't synchronized or
-             * can't possibly throw exceptions in its main body, so
+             * can't possibly throw exceptions in its manifest body, so
              * there's no need for a synchronized method exception
              * handler.
              */

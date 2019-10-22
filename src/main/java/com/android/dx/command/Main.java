@@ -20,7 +20,7 @@ import com.android.dx.Version;
 
 /**
  * Main class for dx. It recognizes enough options to be able to dispatch
- * to the right "actual" main.
+ * to the right "actual" manifest.
  */
 public class Main {
     private static String USAGE_MESSAGE =
@@ -34,7 +34,7 @@ public class Main {
                     "  [--dump-method=<name>[*]] [--verbose-dump] [--no-files] " +
                     "[--core-library]\n" +
                     "  [--num-threads=<n>] [--incremental] [--force-jumbo]\n" +
-                    "  [--multi-dex [--main-dex-list=<file> [--minimal-main-dex]]\n" +
+                    "  [--multi-dex [--manifest-dex-list=<file> [--minimal-manifest-dex]]\n" +
                     "  [--input-list=<file>]\n" +
                     "  [<file>.class | <file>.{zip,jar,apk} | <directory>] ...\n" +
                     "    Convert a set of classfiles into a dex file, optionally " +
@@ -47,12 +47,12 @@ public class Main {
                     "    exclusive with --incremental, causes --num-threads to be ignored " +
                     "and only\n" +
                     "    supports folder or archive output.\n" +
-                    "    --main-dex-list=<file>: <file> is a list of class file names, " +
+                    "    --manifest-dex-list=<file>: <file> is a list of class file names, " +
                     "classes defined by\n" +
                     "    those class files are put in classes.dex.\n" +
-                    "    --minimal-main-dex: only classes selected by --main-dex-list are " +
+                    "    --minimal-manifest-dex: only classes selected by --manifest-dex-list are " +
                     "to be put in\n" +
-                    "    the main dex.\n" +
+                    "    the manifest dex.\n" +
                     "    --input-list: <file> is a list of inputs.\n" +
                     "    Each line in <file> must end with one of: .class .jar .zip .apk or be a directory.\n" +
                     "  dx --annotool --annotation=<class> [--element=<element types>]\n" +

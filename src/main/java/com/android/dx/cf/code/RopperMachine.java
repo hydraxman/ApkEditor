@@ -360,7 +360,7 @@ import java.util.ArrayList;
              *
              * What we do is first move all the source registers into
              * the "temporary stack" area defined for the method, and
-             * then move stuff back down onto the main "stack" in the
+             * then move stuff back down onto the manifest "stack" in the
              * arrangement specified by the stack op pattern.
              *
              * Note: This code ends up emitting a lot of what will

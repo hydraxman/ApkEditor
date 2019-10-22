@@ -234,7 +234,7 @@ public abstract class Section {
     public abstract Collection<? extends Item> items();
 
     /**
-     * Does the main work of {@link #prepare}.
+     * Does the manifest work of {@link #prepare}.
      */
     protected abstract void prepare0();
 

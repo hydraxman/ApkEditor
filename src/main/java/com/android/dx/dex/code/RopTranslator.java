@@ -575,7 +575,7 @@ public final class RopTranslator {
                 }
                 case Rop.BRANCH_GOTO: {
                     /*
-                     * Code in the main translation loop will emit a
+                     * Code in the manifest translation loop will emit a
                      * goto if necessary (if the branch isn't to the
                      * immediately subsequent block).
                      */
